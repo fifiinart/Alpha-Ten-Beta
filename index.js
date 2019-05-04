@@ -23,7 +23,7 @@ client.registry.registerDefaults()
   .registerCommandsIn(path.join(__dirname, "commands"));
 
 // Events
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`Alpha Ten Beta v. ${config.version} is logged into ${Array.from(client.guilds).length} guilds and ready to be used.. use "${client.commandPrefix}help".`);
   client.user.setActivity(`${client.commandPrefix}help in ${Array.from(client.guilds).length} guilds`, {
     type: "LISTENING"
