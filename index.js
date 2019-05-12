@@ -30,7 +30,7 @@ client.on('ready', async () => {
     });
     for (let guild of client.guilds.values()) {
       guild.members.get(client.user.id)
-        .setNickname(`(${client.commandPrefix.trim()}) Alpha Ten (Beta)`)
+        .setNickname(`(${guild.commandPrefix.trim()}) Alpha Ten (Beta)`)
     }
   })
   .on('commandPrefixChange', async (guild, prefix) => {
@@ -55,5 +55,5 @@ client.setProvider(
   )
   .catch(console.error);
 
-
+keep_alive();
 client.login(config.botToken);

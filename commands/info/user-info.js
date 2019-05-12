@@ -26,26 +26,84 @@ module.exports = class UserInfoCommand extends Command {
   }
 
   async run(msg, args) {
-    let pages = ['page 1', 'page 2', 'page 3', 'page 4', 'page 5'];
-    let page = 0;
-    let returnMsg = await msg.say(pages[page]);
-    await returnMsg.react('⏪');
-    await returnMsg.react('\u25C0');
-    await returnMsg.react('\u25B6');
-    await returnMsg.react('⏩');
-    returnMsg.createReactionCollector((reaction, user) => (reaction.emoji.name === '⏪' || reaction.emoji.name === '\u25C0' || reaction.emoji.name === '\u25B6' || reaction.emoji.name === '⏩') && user !== this.client.user, {
-        time: 2 ** 31 - 1
-      })
-      .on('collect', (collected) => {
-        if (collected.emoji.name === '⏪') page = 0;
-        else if (collected.emoji.name === '\u25C0') page--;
-        else if (collected.emoji.name === '\u25B6') page++;
-        else if (collected.emoji.name === '⏩') page = pages.length - 1;
-
-        if (page >= pages.length) pages = pages.length - 1;
-        if (page < 0) page = 0
-
-        returnMsg.edit(pages[page])
-      })
+    let clientUser = this.client.user;
+    let status;
+    switch (args.user.presence.status) {
+      case "online":
+        status = "Online";
+        break;
+      case "idle":
+        status = "Idle";
+        break;
+      case "dnd":
+        status = "Do Not Disturb";
+        break;
+      case "offline":
+        status = "Offline";
+        break;
+    }
+    let game;
+    if (args.user.presence.game) {
+      switch (args.user.presence.game.type) {
+        case 0:
+          game = `Playing ${args.user.presence.game.toString()}`;
+          break;
+        case 1:
+          game = `Streaming ${args.user.presence.game.toString()} at ${args.user.presence.game.url}`;
+          break;
+        case 2:
+          game = `Listening to ${args.user.presence.game.toString()}`;
+          break;
+        case 3:
+          game = `Watching ${args.user.presence.game.toString()}`;
+          break;
+      }
+    } else {
+      game = "No current activity"
+    }
+    let embed = new RichEmbed({
+      "title": `${args.user.username} Info`,
+      "author": {
+        "name": clientUser.username,
+        "icon_url": clientUser.avatarURL
+      },
+      "color": config.embedColor,
+      "timestamp": Date.now(),
+      "thumbnail": {
+        "url": args.user.avatarURL
+      },
+      "footer": {
+        text: `Requested by ${msg.author.username}`,
+        icon_url: msg.author.avatarURL
+      },
+      "fields": [{
+          "name": "Tag",
+          "value": args.user.tag,
+          "inline": true
+        },
+        {
+          "name": "ID",
+          "value": args.user.id,
+          "inline": true
+        },
+        {
+          "name": "Presence",
+          "value": `Status: ${status}
+          Activity: ${game}`,
+          "inline": true
+        },
+        {
+          "name": "Type",
+          "value": `${args.user.bot ? "Bot" : "User"}`,
+          "inline": true
+        },
+        {
+          "name": "Created At",
+          "value": `${new Date(args.user.createdTimestamp)}`,
+          "inline": true
+        }
+      ]
+    })
+    msg.embed(embed)
   }
 }
